@@ -44,9 +44,22 @@ def upload_file():
 
 
 def put_in_s3(filename, data):
+
+    # determine the "AWS Profile", there are three options:
+    # 1. the value is taken from ['AWS']['Profile'] or
+    # 2. ...from ['DEFAULT']['Profile'] or
+    # 3. ...from an ~/.aws/credentials [default]
+
+    if True == config.has_option('AWS', 'Profile'):
+      profile = config['AWS']['Profile']
+    elif False == config.has_option('DEFAULT', 'Profile'):
+      profile = 'default'
+
     # create an STS client object that represents a live connection to the
     # STS service
-    sts_client = boto3.client('sts')
+
+    sts_session = boto3.Session(profile_name=profile)
+    sts_client = sts_session.client('sts')
 
     # Call the assume_role method of the STSConnection object and pass the role
     # ARN and a role session name.
